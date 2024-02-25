@@ -1,9 +1,11 @@
 package com.codiz.java_encryption.cryptography;
 
+import org.springframework.stereotype.Component;
+
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.SecureRandom;
-
+@Component
 public class SymmetricKey {
 
     private static final String AES = "AES";
