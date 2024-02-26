@@ -9,8 +9,8 @@ import java.util.Base64;
 
 public class EncryptionDecryption {
     private SecretKey key;
-    private int Key_Size;
-    private int tLen;
+    private int Key_Size = 128;
+    private int tLen = 128;
     Cipher encryptionCipher;
 
     public void init() throws NoSuchAlgorithmException {
