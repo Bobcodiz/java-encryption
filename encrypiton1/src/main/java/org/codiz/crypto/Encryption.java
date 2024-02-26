@@ -37,12 +37,12 @@ public class Encryption {
     //create a method to decrypt the encrypted message
 
     public String decrypt(String encryptedMessage) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-        byte[] message = decrypt(encryptedMessage).getBytes();
+        byte[] message = decode(encryptedMessage);
         Cipher decryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");
         GCMParameterSpec spec = new GCMParameterSpec(T_LEN,encryptionCipher.getIV());
         decryptionCipher.init(Cipher.DECRYPT_MODE,SECRET_kEY,spec);
         byte[] decryptedMessage = decryptionCipher.doFinal(message);
-        return new String(decode(Arrays.toString(decryptedMessage)));
+        return new String(decryptedMessage);
     }
 
     public String encrypt(byte[] data){
