@@ -21,17 +21,22 @@ public class EncryptionDecryption {
         key = generator.generateKey();
     }
 
-    public void stringInitialization(String secretkey,String IV){
+  /*  public void stringInitialization(String secretkey,String IV){
         key = new SecretKeySpec(decode(secretkey),"AES");
         this.IV = decode(IV);
-    }
-    public String encrypt(String message) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    }*/
+    public String encrypt(String message) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
         byte[] messageToEncrypt = message.getBytes();
         Cipher encryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");
+        IV = encryptionCipher.getIV();
         GCMParameterSpec spec = new GCMParameterSpec(tLen,IV);
-        encryptionCipher.init(Cipher.ENCRYPT_MODE,key);
+        encryptionCipher.init(Cipher.ENCRYPT_MODE,key,spec);
         byte[] encryptedMessage = encryptionCipher.doFinal(messageToEncrypt);
         return encode(encryptedMessage);
+    }
+    public void displayKeys(){
+        System.out.println("secret key: "+encode(key.getEncoded()));
+        System.out.println("IV : "+encode(IV));
     }
     public String decrypt(String encryptedMessage) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         byte[] message = decode(encryptedMessage);
