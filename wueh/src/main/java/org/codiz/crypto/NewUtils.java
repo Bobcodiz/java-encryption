@@ -1,65 +1,73 @@
 package org.codiz.crypto;
 
-import javax.crypto.*;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 public class NewUtils {
-        private SecretKey SECRET_KEY;
-        private byte[] IV;
+    private SecretKey secretKey;
 
-        public void init() {
-            try {
-                KeyGenerator generator = KeyGenerator.getInstance("AES");
-                generator.init(128);
-                SECRET_KEY = generator.generateKey(); // Store the generated key
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
-        }
+    private int T_Len=128;
+    private byte[] IV;
 
-        public String encrypt(String message) throws Exception {
-            SecureRandom secureRandom = new SecureRandom();
-            IV = new byte[12];
-            secureRandom.nextBytes(IV);
+    public SecretKey init() throws Exception{
+        int size = 256;
+        KeyGenerator generator = KeyGenerator.getInstance("AES");
+        generator.init(size);
+        secretKey= generator.generateKey();
+        return secretKey;
+    }
 
-            Cipher encryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");
-            encryptionCipher.init(Cipher.ENCRYPT_MODE, SECRET_KEY, new GCMParameterSpec(128, IV));
-            byte[] encryptedBytes = encryptionCipher.doFinal(message.getBytes());
-            return encode(IV) + encode(encryptedBytes); // Return IV + encrypted data
-        }
+    public String encrypt(String message)throws Exception{
+        byte[] messageBytes = message.getBytes();
+        Cipher encryptionCipher  = Cipher.getInstance
+                ("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec
+                (T_Len,IV);
+        encryptionCipher.init(Cipher.ENCRYPT_MODE,secretKey,spec);
+        /*IV = encryptionCipher.getIV();*/
+        byte[] encryptedBytes = encryptionCipher.doFinal(messageBytes);
+        return encode(encryptedBytes);
+    }
 
-        public String decrypt(String encryptedMessage) {
-            try {
-                byte[] iv = decode(encryptedMessage.substring(0, 16)); // Extract IV
-                byte[] messageToDecrypt = decode(encryptedMessage.substring(16));
+    public String decrypt(String encryptedMessage)throws Exception{
+        byte[] messageBytes = decode(encryptedMessage);
+        Cipher decryptionCipher = Cipher.getInstance
+                ("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec(T_Len,IV);
+        decryptionCipher.init(Cipher.DECRYPT_MODE,secretKey,spec);
+        byte[] decryptedBytes = decryptionCipher.doFinal(messageBytes);
+        return new String(decryptedBytes);
+    }
 
-                Cipher decryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");
-                decryptionCipher.init(Cipher.DECRYPT_MODE, SECRET_KEY, new GCMParameterSpec(128, iv));
-                byte[] decryptedBytes = decryptionCipher.doFinal(messageToDecrypt);
-                return new String(decryptedBytes);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        public String encode(byte[] data) {
-            return Base64.getEncoder().encodeToString(data);
-        }
-
-        public byte[] decode(String data) {
-            return Base64.getDecoder().decode(data);
-        }
-
+    private String encode(byte[] data){
+        return Base64.getEncoder().encodeToString(data);
+    }
+    private byte[] decode(String data){
+        return Base64.getDecoder().decode(data);
+    }
+    public void initFromStrings(String Key,String IV)
+    {
+        secretKey = new SecretKeySpec(decode(Key),"AES");
+        this.IV =decode(IV);
+    }
+    public String exportKeys(){
+        System.out.println("Secret Key :"+encode(secretKey.getEncoded()));
+        System.out.println("iv :"+encode(IV));
+        return null;
+    }
     public static void main(String[] args) throws Exception {
         NewUtils utils = new NewUtils();
-        utils.init();
-        String message = utils.encrypt("Bobby");
-        String dec = utils.decrypt(message);
+        utils.initFromStrings("3k8C9JS6p0d4LwgF+PSa9a4qjNWPh/klCJC3Lm0wmuY=","cfXyXPfwgggkgp0c");
+       /* String message = utils.encrypt("Bobby");*/
+        String dec = utils.decrypt("HE7AxgtG/xOUEoP9BcjbxP6tPWJs");
 
-        System.out.println(message);
+
+       /* System.out.println(message);*/
         System.out.println(dec);
+
     }
 
 }
